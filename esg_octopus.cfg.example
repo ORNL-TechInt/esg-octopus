@@ -1,0 +1,4 @@
+PluginDir = ./plugins
+PlugoutDir = ./plugouts
+
+.nc = netcdf
