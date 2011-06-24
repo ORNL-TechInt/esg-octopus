@@ -1,5 +1,30 @@
 #!/bin/env jython
+"""
+Pluggable metadata extractor and formatter
 
+ -c, --config <filepath>
+    Specify the configuration file. Default: './esg_octopus.cfg'.
+
+ -d, --debug
+    Run the program under the python debugger. Default: False.
+
+ -I, --input_format <plugin>
+    Use <plugin> to extract metadata from the input file(s).
+    Default: None.
+
+ -i, --input_location <path>
+    Where to find the input file(s) to be scanned. Default: None.
+
+ -O, --output_format <plugout>
+    Use <plugout> to format and write the metadata output. Default: None.
+
+ -o, --output_location <path>
+    Where to write the output file(s). Default: None.
+
+ -x, --extra_metadata <path>
+    File containing extra metadata to be included in the output.
+    Default: None.
+"""
 import glob
 import os
 import pdb
@@ -10,6 +35,9 @@ from optparse import *
 
 # ===========================================================================
 def main(args):
+    """
+    Accept and process command line options, import plug{in,out}s, launch.
+    """
     p = OptionParser()
     p.add_option('-c', '--config',
                  action='store', default='./esg_octopus.cfg', dest='config',
@@ -51,13 +79,25 @@ def main(args):
 
 # ===========================================================================
 def config(item):
+    """
+    Retrieve a configuration value from dict CFG.
+
+    Dictionary CFG is shared among the configuration management
+    routines, set_default(), config_load(), and config().
+    """
     global CFG
     return CFG[item]
 
 # ===========================================================================
 def config_load(filename):
+    """
+    Call set_defaults to load CFG, then load config file values.
+
+    Dictionary CFG is shared among the configuration management
+    routines, set_default(), config_load(), and config().
+    """
     global CFG
-    CFG = {}
+    set_defaults()
     f = open(filename, 'r')
     for line in f:
         line = re.sub("#.*", "", line)
@@ -66,6 +106,20 @@ def config_load(filename):
             CFG[k] = v.strip("\r\n")
     f.close()
     print CFG
+    
+# ===========================================================================
+def set_defaults():
+    """
+    Set default values in the CFG dictionary.
+
+    Dictionary CFG is shared among the configuration management
+    routines, set_default(), config_load(), and config().
+    """
+    global CFG
+    CFG = {}
+    CFG["PluginDir"] = "./plugins"
+    CFG["PlugoutDir"] = "./plugouts"
+    CFG[".cf"] = "netcdf"
     
 # ===========================================================================
 sname = sys.argv[0]
