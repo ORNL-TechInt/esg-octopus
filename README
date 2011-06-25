@@ -1,0 +1,116 @@
+ESG Octopus Development Notes
+
+What's here:
+   README
+      This file. It is in git.
+
+   esg_octopus.py
+      The base script that implements the octopus beak. To create the
+      "esg_octopus" symlink, run "./esg_octopus.py --makelink".
+      esg_octopus.py is in git. The symlink (esg_octopus) is not.
+
+   esg_octopus.cfg
+      The configuration file for esg_octopus. Not in git.
+
+   esg_octopus.cfg.example
+      An example configuration file that can be copied to
+      esg_octopus.cfg. This is in git.
+
+   data/
+      A copy of the THREDDS catalog from ORNL's production data node
+      esg2-sdn1. This is not checked into git.
+
+   java/
+      The .jar files needed for plugins and plugouts. These are not in
+      git. The setup/install script (not yet written) will download
+      these at install time.
+
+   plugins
+      Where input format plugins reside. Each plugin has the structure
+      described later in this file. The netcdf example plugin is in git.
+
+   plugouts
+      Where output format plugins reside. Each plugout has the
+      structure described later in this file. The thredds example
+      plugout is in git.
+
+What Needs to be Done
+
+ - Finish characterizing the contents of our current THREDDS catalog
+   for guidance on what needs to go into THREDDS catalogs used in ESG.
+   This will likely need to be broadened in the future. We have to
+   start somewhere.
+
+ - Figure out how to build a catalog in memory using the
+   ThreddsXmlWriter and related classes.
+
+ - Identify the calls the thredds plugout will make to gather the
+   information it needs to construct the catalog. The thredds plugout
+   will call up to the beak. The beak will forward these calls to the
+   netcdf plugin.
+
+ - Write the routines in the beak layer that will receive the calls
+   from the thredds plugout.
+
+ - Work out how to incorporate the cdms2 python module into
+   esg_octopus. Is this another piece the install script has to
+   download at install time? This will be needed to complete the
+   netcdf routines.
+
+ - Write the routines in the netcdf plugin that will receive the calls
+   forwarded by the beak.
+
+Plugin/Plugout Layout
+
+   Each plugin or plugout has its own subdirectory in the respective
+   PluginDir or PlugoutDir, as defined in the configuration file.
+
+   At a minimum, the plug{in,out} directory contains a file named
+   __init__.py which is called when the plug{in,out} is imported.
+
+   The subdirectory name is the string the user will enter on the
+   command line as the argument for options --input_format or
+   --output_format to use the named plug{in,out}.
+
+Current THREDDS Catalog Characterizationn
+
+   Looking at THREDDS xml files copied from esg2-sdn1.
+
+   All files begin with the line
+
+      <?xml version='1.0' encoding='UTF-8'?>
+
+   This is followed in each file by a single <catalog> ... </catalog>
+   element which occupies the rest of the file. It appears that the
+   <catalog ...> tag always contains the same attributes (xmlns:xsi,
+   xmlns:xlink, xmlns, name, xsi:schemaLocation). Only the value of
+   the name attribute varies. For the catalog.xml file at the top
+   level, name is "ORNL Earth System Grid catalog". For files one
+   layer down, it's always "TDS configuration file".
+
+   catalog.xml: Inside the <catalog> ... </catalog> element appear:
+    - datasetRoot
+       > path
+       > location
+    - catalogRef (repeated 46 times)
+       > name
+       > xlink:title
+       > xlink: href
+
+   The following files are missing from catalog.xml:
+
+      ornl.arm.data.mytest.v1.xml
+      ornl.arm.data.rgmtest.v1.xml
+      ornl.ccsm.b30.041g.proc.tseries.monthly.v1.xml
+      ornl.cdiac.ameriflux_L2.AMF_USARb.v1.xml
+      ornl.cdiac.ameriflux_L2.AMF_USARc.v1.xml
+      ornl.cdiac.ameriflux_L2.AMF_USARM.v1.xml
+      ornl.cdiac.ameriflux_L2.AMF_USAud.v1.xml
+      ornl.cdiac.ameriflux_L2.AMF_USSP1.v1.xml
+      pcmdi.ornl.test.mytest.v1.xml
+      pcmdi.test.mytest.v1.xml
+
+   In the lower level files, <catalog> ... </catalog> contains:
+    - service
+    - property
+    - dataset (may be nested)
