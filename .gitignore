@@ -3,3 +3,5 @@
 *.class
 esg_octopus
 esg_octopus.cfg
+data
+java
