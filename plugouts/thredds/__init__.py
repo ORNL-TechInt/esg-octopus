@@ -1,9 +1,14 @@
+import os
 import sys
 
 print("This is thredds.__init__()")
 
-octopus = "/ccs/proj/techint/esg/esg-octopus/"
-netcdf = octopus + "java/netcdf/"
+if "THREDDS_JAVA" in os.environ.keys():
+    netcdf = os.environ["THREDDS_JAVA"]
+else:
+    octopus = "/ccs/proj/techint/esg/esg-octopus/"
+    netcdf = octopus + "java/netcdf/"
+    
 sys.path.append(netcdf + "netcdf-4.2.jar")
 sys.path.append(netcdf + "slf4j-log4j12-1.5.6.jar")
 sys.path.append(netcdf + "slf4j-api-1.5.6.jar")
@@ -15,35 +20,37 @@ import org.jdom.Document
 import org.slf4j.LoggerFactory
 import thredds.catalog
 import thredds.catalog2.xml.writer.ThreddsXmlWriter
+import java.net.URI
+import java.io
 
-
-def launch():
+def launch(inpath, outpath):
     print("This is thredds.launch()")
-
+    print sys.modules['__main__']
+    
     factory = thredds.catalog.InvCatalogFactory("default", True)
-    print("factory:")
-    print(type(factory))
-    print dir(factory)
+    
+    catalog = thredds.catalog.InvCatalogImpl("slagit",
+                                             "1.0",
+                                             java.net.URI("./slagit.xml"))
 
-    cname = "file:" + octopus \
-            + "data/1/ornl.ultrahighres.CESM1.T85F09.B1850.v1.xml"
-    # cname = "file:" + octopus + "data/catalog.xml"
-    catalog = factory.readXML(cname)
-    print("\ncatalog:")
-    print(type(catalog))
-    print dir(catalog)
-
-    print "\nname: ", catalog.getName()
-    print "dataset roots: ", catalog.getDatasetRoots()
-
-    print "datasets: "
-    for ds in catalog.getDatasets():
-        print "   %s" % ds
+    cs = sys.modules['__main__'].getServices()
+    for sname in cs.keys():
         
-    print "services: "
-    for svc in catalog.getServices():
-        print "    %s" % svc
-        
-    print "base URI: ", catalog.getBaseURI()
-    print "version: ", catalog.getVersion()
+        svc = thredds.catalog.InvService(cs[sname]['name'],
+                                         cs[sname]['serviceType'],
+                                         cs[sname]['base'],
+                                         "",
+                                         cs[sname]['desc'])
+
+        for p in cs[sname]['properties'].keys():
+            for val in cs[sname]['properties'][p]:
+                prop = thredds.catalog.InvProperty(p, val)
+                svc.addProperty(prop)
+                
+        catalog.addService(svc)
+
+    
+    catalog.finish()
+    factory.writeXML(catalog, outpath)
+
     

@@ -1,7 +1,9 @@
 *~
-*.pyc
 *.class
+*.pyc
+*.xml
 esg_octopus
 esg_octopus.cfg
 data
 java
+env

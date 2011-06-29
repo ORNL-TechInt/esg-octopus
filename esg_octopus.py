@@ -75,6 +75,7 @@ def main(args):
     if o.output_format != None:
         O = __import__(o.output_format)
 
+    # print sys.modules
     O.launch()
 
 # ===========================================================================
@@ -86,7 +87,10 @@ def config(item):
     routines, set_default(), config_load(), and config().
     """
     global CFG
-    return CFG[item]
+    if item == '':
+        return CFG.keys()
+    else:
+        return CFG[item]
 
 # ===========================================================================
 def config_load(filename):
@@ -100,12 +104,18 @@ def config_load(filename):
     set_defaults()
     f = open(filename, 'r')
     for line in f:
+        # print line
         line = re.sub("#.*", "", line)
         if re.match("^\s*$", line) == None:
             (k, v) = re.split("\s*=\s*", line)
-            CFG[k] = v.strip("\r\n")
+            v = v.strip("\r\n")
+            if v.startswith('"') and v.endswith('"'):
+                v = v.strip('"')
+            elif v.startswith("'") and v.endswith("'"):
+                v = v.strip("'")
+            CFG[k] = v
     f.close()
-    print CFG
+    # print CFG
     
 # ===========================================================================
 def set_defaults():
@@ -121,6 +131,80 @@ def set_defaults():
     CFG["PlugoutDir"] = "./plugouts"
     CFG[".cf"] = "netcdf"
     
+# ===========================================================================
+def getServices():
+    """
+    Build a services structure from the config. It looks like this:
+
+       {'gridded': {'name':        "gridded",
+                    'serviceType': "OpenDAP",
+                    'base':        "/thredds/dodsC/",
+                    'desc':        "OpenDAP",
+                    'properties': {'requires_authorization': [false],
+                                   'application': ["Web Browser"]
+                                  }
+                   },
+        'HTTPServer': {'name':        "HTTPServer",
+                       'serviceType': "HTTPServer",
+                       'base':        "/thredds/fileServer/",
+                       'desc':        "HTTPServer",
+                       'properties': {'requires_authorization': [true],
+                                      'application': ["Web Browser",
+                                                      "Web Script"]
+                                     }
+                      }
+        'HRMatPCMDI': {'name':        "HRMatPCMDI",
+                       'serviceType': "SRM",
+                       'base':        "srm://host.sample.gov:..."
+                       'desc':        "SRM",
+                       'properties': {'requires_authorization': [false]
+                                     }
+                      }
+       }
+    """
+    pdb.set_trace()
+    svcs = {}
+    kl = config('')
+    pdx = 'properties'
+    for key in kl:
+        if key.startswith('.'):
+            continue
+        if 2 <= len(key.split('.')):
+            v = config(key)
+            k = key.split('.')
+            if 2 == len(k):
+                try:
+                    svcs[k[0]][k[1]] = v
+                except KeyError:
+                    svcs[k[0]] = {}
+                    svcs[k[0]][k[1]] = v
+            elif 3 == len(k):
+                if k[2] == 'name':
+                    pname = v
+                    vdx = k[0] + '.' + k[1] + '.value'
+                    try:
+                        svcs[k[0]][pdx][pname].append(config(vdx))
+                    except KeyError, e:
+                        if k[0] in str(e):
+                            svcs[k[0]] = {}
+                            svcs[k[0]][pdx] = {}
+                            svcs[k[0]][pdx][pname] = []
+                            svcs[k[0]][pdx][pname].append(config(vdx))
+                        elif pdx in str(e):
+                            svcs[k[0]][pdx] = {}
+                            svcs[k[0]][pdx][pname] = []
+                            svcs[k[0]][pdx][pname].append(config(vdx))
+                        elif pname in str(e):
+                            svcs[k[0]][pdx][pname] = []
+                            svcs[k[0]][pdx][pname].append(config(vdx))
+                        else:
+                            raise StandardError("unexpected KeyError: '%s'"
+                                                % e.str())
+                elif k[2] == 'value':
+                    pass
+
+    return svcs
+
 # ===========================================================================
 sname = sys.argv[0]
 if sname.endswith('.py') and '--makelink' in sys.argv:
