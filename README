@@ -72,6 +72,24 @@ Plugin/Plugout Layout
    command line as the argument for options --input_format or
    --output_format to use the named plug{in,out}.
 
+The current publication sequence:
+
+   esgscan_directory --dataset <dataset-name> --project <project-name> \
+      <pathtofiles> > <mapfile>
+      # <mapfile> contains "dataset map" where each line contains:
+
+         dataset_id | absolute_file_path | size
+
+      # <dataset-name> and <project-name> have to be defined in esg.ini
+        
+   esgpublish --map <mapfile> --project <project-name>
+
+   esgpublish --use-existing <dataset-name> --noscan --thredds
+
+   esgpublish --use-existing <dataset-name> --noscan --publish
+      (requires globus certificate)
+
+
 Current THREDDS Catalog Characterizationn
 
    Looking at THREDDS xml files copied from esg2-sdn1.
@@ -112,5 +130,108 @@ Current THREDDS Catalog Characterizationn
 
    In the lower level files, <catalog> ... </catalog> contains:
     - service
+       > OpenDAP
+       > HTTPServer
+       > SRM
     - property
+       > catalog_version
     - dataset (may be nested)
+       > property (multiple)
+       > metadata
+          > variables
+             > variable name="..."
+       > metadata inherited="true"
+       > nested datasets
+
+   In the thredds catalog, we have the following xml files. Under each
+   .xml files is listed the netcdf files it represents
+
+   obs4cmip5.observations.cmbe.ARM.Barrow.in-situ_stations.atmos.1hr.v1.xml
+      PRJ/obs4cmip5/observations/atmos/ps/1hr/in_situ_sites/usdoe/arm/cmbe/
+         v120110314/ps_arm_barrow_cmbe_v1p1_20010101-20101231.nc
+      PRJ/obs4cmip5/observations/atmos/sfc/1hr/in_situ_sites/usdoe/arm/cmbe/
+         v120110314/sfcWind_arm_barrow_cmbe_v1p1_20010101-20101231.nc
+      PRJ/obs4cmip5/observations/atmos/tas/1hr/in_situ_sites/usdoe/arm/cmbe/
+         v120110314/tas_arm_barrow_cmbe_v1p1_20010101-20101231.nc
+      PRJ/obs4cmip5/observations/atmos/uas/1hr/in_situ_sites/usdoe/arm/cmbe/
+         v120110314/uas_arm_barrow_cmbe_v1p1_20010101-20101231.nc
+      PRJ/obs4cmip5/observations/atmos/vas/1hr/in_situ_sites/usdoe/arm/cmbe/
+         v120110314/vas_arm_barrow_cmbe_v1p1_20010101-20101231.nc
+
+   obs4cmip5.observations.cmbe.ARM.Darwin.in-situ_stations.atmos.1hr.v1.xml
+      PRJ/obs4cmip5/observations/atmos/ps/1hr/in_situ_sites/usdoe/arm/cmbe/
+         v120110314/ps_arm_darwin_cmbe_v1p1_20020101-20101231.nc
+      PRJ/obs4cmip5/observations/atmos/sfc/1hr/in_situ_sites/usdoe/arm/cmbe/
+         v120110314/sfcWind_arm_darwin_cmbe_v1p1_20020101-20101231.nc
+      PRJ/obs4cmip5/observations/atmos/tas/1hr/in_situ_sites/usdoe/arm/cmbe/
+         v120110314/tas_arm_darwin_cmbe_v1p1_20020101-20101231.nc
+      PRJ/obs4cmip5/observations/atmos/uas/1hr/in_situ_sites/usdoe/arm/cmbe/
+         v120110314/uas_arm_darwin_cmbe_v1p1_20020101-20101231.nc
+      PRJ/obs4cmip5/observations/atmos/vas/1hr/in_situ_sites/usdoe/arm/cmbe/
+         v120110314/vas_arm_darwin_cmbe_v1p1_20020101-20101231.nc
+
+   obs4cmip5.observations.cmbe.ARM.Manus.in-situ_stations.atmos.1hr.v1.xml
+      PRJ/obs4cmip5/observations/atmos/ps/1hr/in_situ_sites/usdoe/arm/cmbe/
+         v120110314/ps_arm_manus_cmbe_v1p1_19980101-20101231.nc
+      PRJ/obs4cmip5/observations/atmos/sfc/1hr/in_situ_sites/usdoe/arm/cmbe/
+         v120110314/sfcWind_arm_manus_cmbe_v1p1_19980101-20101231.nc
+      PRJ/obs4cmip5/observations/atmos/tas/1hr/in_situ_sites/usdoe/arm/cmbe/
+         v120110314/tas_arm_manus_cmbe_v1p1_19980101-20101231.nc
+      PRJ/obs4cmip5/observations/atmos/uas/1hr/in_situ_sites/usdoe/arm/cmbe/
+         v120110314/uas_arm_manus_cmbe_v1p1_19980101-20101231.nc
+      PRJ/obs4cmip5/observations/atmos/vas/1hr/in_situ_sites/usdoe/arm/cmbe/
+         v120110314/vas_arm_manus_cmbe_v1p1_19980101-20101231.nc
+
+   obs4cmip5.observations.cmbe.ARM.Nauru.in-situ_stations.atmos.1hr.v1.xml
+   ornl.arm.cmbe-atm.nsac1.v1.xml
+   ornl.arm.cmbe-atm.sgpc1.v1.xml
+   ornl.arm.cmbe-atm.twpc1.v1.xml
+   ornl.arm.cmbe-atm.twpc2.v1.xml
+   ornl.arm.cmbe-atm.twpc3.v1.xml
+   ornl.arm.cmbe-cldrad.nsac1.v1.xml
+   ornl.arm.cmbe-cldrad.sgpc1.v1.xml
+   ornl.arm.cmbe-cldrad.twpc1.v1.xml
+   ornl.arm.cmbe-cldrad.twpc2.v1.xml
+   ornl.arm.cmbe-cldrad.twpc3.v1.xml
+   ornl.arm.data.mytest.v1.xml
+   ornl.arm.data.offline.v1.xml
+   ornl.arm.data.rgmtest.v1.xml
+   ornl.ccsm.b30.041g.proc.tseries.monthly.v1.xml
+   ornl.cdiac.ameriflux_L2.AMF_USARb.v1.xml
+   ornl.cdiac.ameriflux_L2.AMF_USARc.v1.xml
+   ornl.cdiac.ameriflux_L2.AMF_USARM.v1.xml
+   ornl.cdiac.ameriflux_L2.AMF_USAud.v1.xml
+   ornl.cdiac.ameriflux_L2.AMF_USSP1.v1.xml
+   ornl.c-lamp.exp1.clm3_casa.exp1_2.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1.clm3_casa.exp1_3.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1.clm3_casa.exp1_4.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1.clm3_casa.exp1_6.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1.clm3_casa.exp1_7.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1.clm3_cn.exp1_2.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1.clm3_cn.exp1_3.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1.clm3_cn.exp1_4.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1.clm3_cn.exp1_6.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1.clm3_cn.exp1_7.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1_fix.clm3_casa.exp1_2.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1_fix.clm3_casa.exp1_3.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1_fix.clm3_casa.exp1_4.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1_fix.clm3_casa.exp1_6.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1_fix.clm3_casa.exp1_7.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1_fix.clm3_cn.exp1_2.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1_fix.clm3_cn.exp1_3.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1_fix.clm3_cn.exp1_4.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1_fix.clm3_cn.exp1_6.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp1_fix.clm3_cn.exp1_7.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp2.clm3_casa.exp2_2.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp2.clm3_casa.exp2_3.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp2.clm3_casa.exp2_4.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp2.clm3_casa.exp2_6.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp2.clm3_cn.exp2_2.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp2.clm3_cn.exp2_3.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp2.clm3_cn.exp2_4.run1.monthly_mean.v1.xml
+   ornl.c-lamp.exp2.clm3_cn.exp2_6.run1.monthly_mean.v1.xml
+   ornl.ultrahighres.CESM1.T85F09_12YRS.F1850.v1.xml
+   ornl.ultrahighres.CESM1.T85F09_5YRS.B1850.v1.xml
+   ornl.ultrahighres.CESM1.T85F09.B1850.v1.xml
+   pcmdi.ornl.test.mytest.v1.xml
+   pcmdi.test.mytest.v1.xml
