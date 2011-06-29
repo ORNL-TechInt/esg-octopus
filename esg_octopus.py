@@ -75,8 +75,7 @@ def main(args):
     if o.output_format != None:
         O = __import__(o.output_format)
 
-    # print sys.modules
-    O.launch()
+    O.launch(o.input_location, o.output_location)
 
 # ===========================================================================
 def config(item):
@@ -104,7 +103,6 @@ def config_load(filename):
     set_defaults()
     f = open(filename, 'r')
     for line in f:
-        # print line
         line = re.sub("#.*", "", line)
         if re.match("^\s*$", line) == None:
             (k, v) = re.split("\s*=\s*", line)
@@ -115,7 +113,6 @@ def config_load(filename):
                 v = v.strip("'")
             CFG[k] = v
     f.close()
-    # print CFG
     
 # ===========================================================================
 def set_defaults():
@@ -162,7 +159,6 @@ def getServices():
                       }
        }
     """
-    pdb.set_trace()
     svcs = {}
     kl = config('')
     pdx = 'properties'

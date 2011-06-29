@@ -25,7 +25,6 @@ import java.io
 
 def launch(inpath, outpath):
     print("This is thredds.launch()")
-    print sys.modules['__main__']
     
     factory = thredds.catalog.InvCatalogFactory("default", True)
     
@@ -48,7 +47,6 @@ def launch(inpath, outpath):
                 svc.addProperty(prop)
                 
         catalog.addService(svc)
-
     
     catalog.finish()
     factory.writeXML(catalog, outpath)
