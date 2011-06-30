@@ -25,14 +25,15 @@ import java.io
 
 def launch(inpath, outpath):
     print("This is thredds.launch()")
+    main = sys.modules['__main__']
     
     factory = thredds.catalog.InvCatalogFactory("default", True)
     
-    catalog = thredds.catalog.InvCatalogImpl("slagit",
+    catalog = thredds.catalog.InvCatalogImpl(outpath,
                                              "1.0",
-                                             java.net.URI("./slagit.xml"))
+                                             java.net.URI(outpath))
 
-    cs = sys.modules['__main__'].getServices()
+    cs = main.getServices()
     for sname in cs.keys():
         
         svc = thredds.catalog.InvService(cs[sname]['name'],
@@ -47,7 +48,12 @@ def launch(inpath, outpath):
                 svc.addProperty(prop)
                 
         catalog.addService(svc)
-    
+
+    catalog.addProperty(thredds.catalog.InvProperty("catalog_version",
+                                                    "2"))
+
+    # thredds.catalog.InvDatasetImpl(???)
+
     catalog.finish()
     factory.writeXML(catalog, outpath)
 
