@@ -2,3 +2,31 @@ PluginDir = ./plugins
 PlugoutDir = ./plugouts
 
 .nc = netcdf
+
+gridded.serviceType = OpenDAP
+gridded.base = /thredds/dodsC/
+gridded.desc = OpenDAP
+gridded.name = gridded
+gridded.reqauth.name = requires_authorization
+gridded.reqauth.value = false
+gridded.app.name = application
+gridded.app.value = "Web Browser"
+
+HTTPServer.name = HTTPServer
+HTTPServer.desc = HTTPServer
+HTTPServer.serviceType = HTTPServer
+HTTPServer.base = /thredds/fileServer/
+HTTPServer.reqauth.name = requires_authorization
+HTTPServer.reqauth.value = true
+HTTPServer.app1.name = application
+HTTPServer.app1.value = "Web Browser"
+HTTPServer.app2.name = application
+HTTPServer.app2.value = "Web Script"
+
+HRMatPCMDI.name = HRMatPCMDI
+HRMatPCMDI.desc = SRM
+HRMatPCMDI.serviceType = SRM
+HRMatPCMDI.base = srm://host.sample.gov:6288/srm/v2/server?SFN%3D/archive.sample.gov/
+HRMatPCMDI.reqauth.name = requires_authorization
+HRMatPCMDI.reqauth.value = false
+
