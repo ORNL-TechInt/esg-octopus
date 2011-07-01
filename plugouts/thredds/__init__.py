@@ -19,15 +19,13 @@ import org.apache.log4j.Level
 import org.jdom.Document
 import org.slf4j.LoggerFactory
 import thredds.catalog
-import thredds.catalog2.xml.writer.ThreddsXmlWriter
+import thredds.catalog2.xml.writer
 import java.net.URI
 import java.io
 
 def launch(inpath, outpath):
     print("This is thredds.launch()")
     main = sys.modules['__main__']
-    
-    factory = thredds.catalog.InvCatalogFactory("default", True)
     
     catalog = thredds.catalog.InvCatalogImpl(outpath,
                                              "1.0",
@@ -52,9 +50,38 @@ def launch(inpath, outpath):
     catalog.addProperty(thredds.catalog.InvProperty("catalog_version",
                                                     "2"))
 
-    # thredds.catalog.InvDatasetImpl(???)
-
+    dsl = main.getDatasets(inpath)
+    top = thredds.catalog.InvDatasetImpl(None, dsl[0])
+    top.setID(dsl[0])
+    top.setName(dsl[0])
+    top.addAccess(thredds.catalog.InvAccessImpl(top, "esg-user", svc))
+    catalog.addDataset(top)
+    for ds in dsl[1:]:
+        dsobj = thredds.catalog.InvDatasetImpl(top, ds)
+        dsobj.finish()
+        top.addDataset(dsobj)
+        
+    top.finish()
     catalog.finish()
-    factory.writeXML(catalog, outpath)
 
+    writetool = "catalog"
+    
+    # write it using InvCatalogFactory
+    if writetool == "catalog":
+        factory = thredds.catalog.InvCatalogFactory("default", True)
+        factory.writeXML(catalog, outpath)
+
+    # write it using ThreddsXmlWriter
+    elif writetool == "txw":
+        factory = thredds.catalog2.xml.writer.ThreddsXmlWriterFactory()
+        writer = factory.createThreddsXmlWriter()
+        writer.writeCatalog(catalog, thang)
+
+    # using thredds.catalog2.xml.writer.stax
+    else:
+        writer = thredds.catalog2.xml.writer.stax.StaxWriter()
+        writer.writeCatalog(catalog, java.io.File(outpath))
+
+        #thang has to be a java.io.File, java.io.Writer, or
+        #java.io.OutputStream
     

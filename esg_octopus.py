@@ -69,12 +69,16 @@ def main(args):
     sys.path.append(config("PluginDir"))
     sys.path.append(config("PlugoutDir"))
 
+    sys.modules['plugin'] = None
     if o.input_format != None:
         I = __import__(o.input_format)
-
+        sys.modules['plugin'] = I
+    
+    sys.modules['plugout'] = None
     if o.output_format != None:
         O = __import__(o.output_format)
-
+        sys.modules['plugout'] = O
+        
     O.launch(o.input_location, o.output_location)
 
 # ===========================================================================
@@ -127,6 +131,10 @@ def set_defaults():
     CFG["PluginDir"] = "./plugins"
     CFG["PlugoutDir"] = "./plugouts"
     CFG[".cf"] = "netcdf"
+    
+# ===========================================================================
+def getDatasets(inpath):
+    return sys.modules['plugin'].getDatasets(inpath)
     
 # ===========================================================================
 def getServices():
