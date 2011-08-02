@@ -1,4 +1,4 @@
-#!/bin/env jython
+#!/bin/env python
 """
 Pluggable metadata extractor and formatter
 
@@ -61,7 +61,7 @@ def main(args):
                  action='store', default=None, dest='extra_metadata',
                  help='where to find extra metadata')
     (o, a) = p.parse_args(args)
-
+    
     if o.debug: pdb.set_trace()
     
     config_load(o.config)
@@ -79,7 +79,7 @@ def main(args):
         O = __import__(o.output_format)
         sys.modules['plugout'] = O
         
-    O.launch(o.input_location, o.output_location)
+    O.launch(o.input_location, o.output_location, o.extra_metadata)
 
 # ===========================================================================
 def config(item):
@@ -132,6 +132,10 @@ def set_defaults():
     CFG["PlugoutDir"] = "./plugouts"
     CFG[".cf"] = "netcdf"
     
+# ===========================================================================
+def getData(inpath, extra_metadata):
+    return sys.modules['plugin'].getData(inpath, extra_metadata)
+
 # ===========================================================================
 def getDatasets(inpath):
     return sys.modules['plugin'].getDatasets(inpath)
