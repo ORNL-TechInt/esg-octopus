@@ -82,23 +82,21 @@ def getData(inpath, extra_metadata):
 
     for v in f.variables.keys():
         iform(output, 'variable/')
-        # iform(output, 'name="%s"' % v)
         iform(output, 'name="%s"' % safe_getattr(f.variables[v], "id", "name"))
-        
-        iform(output,
-              'vocabulary_name="%s"' % safe_getattr(f.variables[v],
-                                                    "long_name"))
-        iform(output,
-              'units="%s"' % safe_getattr(f.variables[v],
-                                          "units"),
-              -1)
+
+        vname = vocabulary_name(f.variables[v])
+        iform(output, 'vocabulary_name="%s"' % vname)
+        iform(output, 'units="%s"' % safe_getattr(f.variables[v],
+                                                  "units"))
+        iform(output, safe_getattr(f.variables[v], "long_name"), -1)
         
     for v in f.axes.keys():
         iform(output, 'variable/')
         iform(output, 'name="%s"' % v)
-        iform(output,
-              'vocabulary_name="%s"' % safe_getattr(f.axes[v], "long_name"))
-        iform(output, 'units="%s"' % safe_getattr(f.axes[v], "units"), -1)
+        vname = vocabulary_name(f.axes[v])
+        iform(output, 'vocabulary_name="%s"' % vname)
+        iform(output, 'units="%s"' % safe_getattr(f.axes[v], "units"))
+        iform(output, safe_getattr(f.axes[v], "long_name"), -1)
 
     # pdb.set_trace()
     try:
@@ -112,6 +110,17 @@ def getData(inpath, extra_metadata):
 
     return rval
 
+# ---------------------------------------------------------------------------
+def vocabulary_name(var):
+    """
+    Return the variable's vocabulary name -- standard_name if it's
+    available, else long_name if it's available, else short_name.
+    """
+    for attr in ["standard_name", "long_name", "short_name"]:
+        rval = safe_getattr(var, attr)
+        if rval is not None:
+            return rval
+    
 # ---------------------------------------------------------------------------
 def dif_switch():
     """
@@ -232,5 +241,5 @@ def safe_getattr(var, attr, attrname=None):
     try:
         rval = var.__getattribute__(attr)
     except AttributeError:
-        rval = ""
+        rval = None
     return rval

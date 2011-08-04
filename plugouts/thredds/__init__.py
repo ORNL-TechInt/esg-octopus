@@ -52,6 +52,16 @@ def launch(inpath, outpath, extra_metadata):
                             % dif[0 : min(10, len(dif))])
 
     f = open(outpath, 'w')
+    f.write("<?xml version='1.0' encoding='UTF-8'?>\n")
+    f.write('<catalog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
+            + ' xmlns:xlink="http://www.w3.org/1999/xlink"'
+            + ' xmlns="http://www.unidata.ucar.edu/namespaces/thredds/'
+            + 'InvCatalog/v1.0"'
+            + ' name="TDS configuration file"'
+            + ' xsi:schemaLocation="http://www.unidata.ucar.edu/namespaces/'
+            + 'thredds/InvCatalog/v1.0'
+            + ' http://www.unidata.ucar.edu/schemas/thredds/'
+            + 'InvCatalog.1.0.2.xsd">\n')
     f.write(result)
     f.close()
     
@@ -86,9 +96,11 @@ def xml_add_child(parent, line, cdepth, stream):
     while (d != None) and (cdepth < d):
         if line.endswith('/'):
             xml_add_child(child, line, d, stream)
-        else:
+        elif '=' in line:
             k, v = line.strip().split("=", 1)
             child[ATTR][k] = v
+        else:
+            child[CHLD].append(line.strip())
 
         d, line = cleanread(stream)
 
@@ -108,15 +120,20 @@ def cleanread(stream):
 # ---------------------------------------------------------------------------
 def xmlify_element_list(parent, indent, result):
     for elem in parent[CHLD]:
-        result.write(indent + '<' + elem[TAG])
-        for k in elem[ATTR].keys():
-            result.write(' ' + k + '=' + elem[ATTR][k])
-        if len(elem[CHLD]) <= 0:
-            result.write('/>\n')
+        if type(elem) == str:
+            result.write(elem)
+        elif type(elem) == dict:
+            result.write('\n' + indent + '<' + elem[TAG])
+            for k in elem[ATTR].keys():
+                result.write(' ' + k + '=' + elem[ATTR][k])
+            if len(elem[CHLD]) <= 0:
+                result.write('/>\n')
+            else:
+                result.write('>')
+                xmlify_element_list(elem, indent + '  ', result)
+                result.write('</' + elem[TAG] + '>\n')
         else:
-            result.write('>\n')
-            xmlify_element_list(elem, indent + '  ', result)
-            result.write(indent + '</' + elem[TAG] + '>\n')
+            raise StandardError("Element contents must be a dict or string.")
         
 # ---------------------------------------------------------------------------
 def xmlement(tag = ''):
