@@ -20,8 +20,8 @@ def getData(inpath, extra_metadata, cfgfunc=None):
 
     # write a list of dimensions
     for dim in f.axes.keys():
-        out.write('  <dimension name="%s" length="%d" isUnlimited="%s" />\n'
-                  % (dim, len(f.axes[dim]), "???"))
+        out.write('  <dimension name="%s" length="%d" />\n'
+                  % (dim, len(f.axes[dim])))
                   
     # write a list of attributes
     for attr in f.attributes.keys():
@@ -36,12 +36,16 @@ def getData(inpath, extra_metadata, cfgfunc=None):
         elif var.typecode() == 'd':
             typename = 'double'
             
-        out.write('  <variable name="%s" shape="%s" type="%s">\n'
-                  % (name, "??", typename))
+        # out.write('  <variable name="%s" shape="%s" type="%s">\n'
+        #          % (name, "??", typename))
+        out.write('  <variable name="%s" type="%s">\n'
+                  % (name, typename))
 
         for attr in var.attributes.keys():
             out.write('    <attribute name="%s" value="%s" />\n'
                       % (attr, var.attributes[attr]))
+
+        out.write('  </variable>\n')
 
     for name in f.axes.keys():
         var = f.axes[name]
@@ -50,13 +54,19 @@ def getData(inpath, extra_metadata, cfgfunc=None):
         elif var.typecode() == 'd':
             typename = 'double'
             
-        out.write('  <variable name="%s" shape="%s" type="%s">\n'
-                  % (name, "??", typename))
+        out.write('  <variable name="%s" type="%s">\n'
+                  % (name, typename))
+        # out.write('  <variable name="%s" shape="%s" type="%s">\n'
+        #           % (name, "??", typename))
 
         for attr in var.attributes.keys():
             out.write('    <attribute name="%s" value="%s" />\n'
                       % (attr, var.attributes[attr]))
 
+        out.write('  </variable>\n')
+
+    out.write('</netcdf>\n')
+    
 # ---------------------------------------------------------------------------
 def dif_switch(cfgfunc):
     """

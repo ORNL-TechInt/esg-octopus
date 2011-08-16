@@ -24,7 +24,7 @@ def getData(inpath, extra_metadata):
     main = sys.modules['__main__']
  
     # load info from esg.ini
-    cfg = loadConfig(None)
+    cfg = loadConfig("esg.ini")
 
     # load info from this run's transient config
     x = SaneConfigParser({})

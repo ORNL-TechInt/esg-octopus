@@ -38,9 +38,12 @@ def main(args):
     """
     Accept and process command line options, import plug{in,out}s, launch.
     """
+    root = os.path.dirname(sys.argv[0])
     p = OptionParser()
     p.add_option('-c', '--config',
-                 action='store', default='./esg_octopus.cfg', dest='config',
+                 action='store',
+                 default='%s/esg_octopus.cfg' % root,
+                 dest='config',
                  help='path to configuration file')
     p.add_option('-d', '--debug',
                  action='store_true', default=False, dest='debug',
@@ -66,8 +69,8 @@ def main(args):
     
     config_load(o.config)
 
-    sys.path.append(config("PluginDir"))
-    sys.path.append(config("PlugoutDir"))
+    sys.path.append(config("PluginDir") % root)
+    sys.path.append(config("PlugoutDir") % root)
 
     sys.modules['plugin'] = None
     if o.input_format != None:
